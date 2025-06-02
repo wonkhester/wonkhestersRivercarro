@@ -282,16 +282,13 @@ const Output = struct {
                 const main_count = @min(active_cfg.main_count, @as(u31, @truncate(ev.view_count)));
                 const sec_count = @as(u31, @truncate(ev.view_count)) -| main_count;
 
-                const only_one_view = ev.view_count == 1 or active_cfg.main_location == .monocle;
-
-                // Don't add gaps if there is only one view.
-                if (only_one_view and cfg.smart_gaps) {
-                    cfg.outer_gaps = 0;
-                    cfg.inner_gaps = 0;
-                } else {
-                    cfg.outer_gaps = active_cfg.outer_gaps;
-                    cfg.inner_gaps = active_cfg.inner_gaps;
-                }
+                cfg.outer_gaps = switch(active_cfg.main_location) {
+                    .left, .right, .top, .bottom, .monocle => @as(u31, active_cfg.outer_gaps),
+                };
+                cfg.inner_gaps = switch(active_cfg.main_location) {
+                    .left, .right, .top, .bottom => @as(u31, active_cfg.inner_gaps),
+                    .monocle => @as(u31, 0),
+                };
 
                 const usable_w = switch (active_cfg.main_location) {
                     .left, .right, .monocle => @as(
